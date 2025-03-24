@@ -28,21 +28,29 @@ if not BOT_TOKEN:
 if not ADMIN_USERNAME or not ADMIN_PASSWORD:
     raise ValueError("ADMIN_USERNAME or ADMIN_PASSWORD environment variable not set")
 
+# Get the directory of the current file (Backend/)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Define paths relative to the location of main.py
+static_dir = os.path.join(current_dir, "build", "static")
+index_path = os.path.join(current_dir, "build", "index.html")
+db_path = os.path.join(current_dir, "abmc.db")
+
 app = FastAPI()
 
 # Serve frontend
-app.mount("/static", StaticFiles(directory="build/static"), name="static")
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 @app.get("/", include_in_schema=False)
 async def serve_index():
-    return FileResponse("build/index.html")
+    return FileResponse(index_path)
 
 @app.get("/{path:path}", include_in_schema=False)
 async def serve_frontend(path: str):
-    return FileResponse("build/index.html")
+    return FileResponse(index_path)
 
 # Database setup
-conn = sqlite3.connect('abmc.db', check_same_thread=False)
+conn = sqlite3.connect(db_path, check_same_thread=False)
 cursor = conn.cursor()
 
 # Create tables
